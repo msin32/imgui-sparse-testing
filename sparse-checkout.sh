@@ -1,53 +1,55 @@
-#!/usr/bin/env sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 DEF_FILE="${1:-sparse-definitions}"
 
 current_module=""
-paths=""
+paths=()
 
-apply_sparse() {
-    mod="$1"
-    shift
-    if [ -z "$mod" ] || [ $# -eq 0 ]; then
+flush_module() {
+    if [[ -z "$current_module" || ${#paths[@]} -eq 0 ]]; then
         return
     fi
-    echo "Applying sparse-checkout for $mod"
-    git -C "$mod" sparse-checkout init --cone 2>/dev/null || true
-    git -C "$mod" sparse-checkout set "$@"
-    git -C "$mod" sparse-checkout reapply
+
+    if [[ ! -d "$current_module" ]]; then
+        echo "Skipping $current_module (directory does not exist)"
+        paths=()
+        return
+    fi
+
+    echo "Applying sparse-checkout for $current_module"
+
+    # Ensure non-cone mode so file paths are allowed
+    git -C "$current_module" sparse-checkout init --no-cone 2>/dev/null || true
+
+    # Apply patterns
+    git -C "$current_module" sparse-checkout set "${paths[@]}"
+    git -C "$current_module" sparse-checkout reapply
+
+    paths=()
 }
 
-while IFS= read -r line || [ -n "$line" ]; do
-    case "$line" in
-        \#*|"") # comment or empty
-            continue
-            ;;
-        
+while IFS= read -r line || [[ -n "$line" ]]; do
+    # trim leading/trailing whitespace
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
 
-\[*\]
+    # skip empty or comment
+    if [[ -z "$line" || "$line" == \#* ]]; then
+        continue
+    fi
 
-)
-            # new module block
-            # flush previous
-            if [ -n "$current_module" ] && [ -n "$paths" ]; then
-                # shellsplit paths into args
-                set -- $paths
-                apply_sparse "$current_module" "$@"
-            fi
-            current_module="${line#[}"
-            current_module="${current_module%]}"
-            paths=""
-            ;;
-        *)
-            # path line
-            paths="$paths $line"
-            ;;
-    esac
+    # section header: [lib/imgui]
+    if [[ "${line:0:1}" == "[" && "${line: -1}" == "]" ]]; then
+        flush_module
+        current_module="${line:1:${#line}-2}"
+    else
+        # ensure leading slash for non-cone correctness
+        if [[ "${line:0:1}" != "/" ]]; then
+            line="/$line"
+        fi
+        paths+=("$line")
+    fi
 done < "$DEF_FILE"
 
-# flush last block
-if [ -n "$current_module" ] && [ -n "$paths" ]; then
-    set -- $paths
-    apply_sparse "$current_module" "$@"
-fi
+flush_module

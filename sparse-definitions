@@ -1,17 +1,25 @@
 # sparse-definitions
 
-[lib/imgui]
-imgui.h
-imgui.cpp
-imgui_draw.cpp
-imgui_widgets.cpp
-imgui_tables.cpp
-backends/imgui_impl_glfw.h
-backends/imgui_impl_glfw.cpp
-backends/imgui_impl_opengl3.h
-backends/imgui_impl_opengl3.cpp
+# [lib/examplelib]
+# /include/examplelib/core.h
+# /src/core.cpp
+# /src/util.cpp
 
-[lib/otherlib]
-include/otherlib/core.h
-src/core.cpp
-src/util.cpp
+[lib/imgui]
+/imgui.h
+/imgui.cpp
+/imgui_internal.h
+/imgui_draw.cpp
+/imgui_widgets.cpp
+/imgui_tables.cpp
+/imconfig.h
+/imgui_demo.cpp
+/imstb_rectpack.h
+/imstb_textedit.h
+/imstb_truetype.h
+/backends/imgui_impl_glfw.h
+/backends/imgui_impl_glfw.cpp
+/backends/imgui_impl_opengl3.h
+/backends/imgui_impl_opengl3.cpp
+/backends/imgui_impl_opengl3_loader.h
+

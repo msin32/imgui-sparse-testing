@@ -174,12 +174,12 @@ int main(int, char**){
           //reduce margin on right side
           ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
           ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 0.0f);
-          ImGui::InputTextMultiline("##text", textbuf, IM_ARRAYSIZE(textbuf),
+          ImGui::InputTextMultiline("##text", textbuf, IM_ARRAYSIZE(textbuf), //use ## to hide label
                           ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 10),
                           ImGuiInputTextFlags_NoHorizontalScroll);
           ImGui::PopStyleVar(2);
           // ImGui::SetNextItemWidth(-FLT_MIN); //make widget take full width, might be alternative to above
-          ImGui::InputTextMultiline("##text", textbuf, 1000); //use ## to hide label
+          // ImGui::InputTextMultiline("##text", textbuf, 1000); //use ## to hide label
           ImGui::End();
         }
         
